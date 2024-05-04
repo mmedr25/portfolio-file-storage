@@ -19,14 +19,16 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <AuthProvider>
+      {/* <AuthProvider> */}
         <ConvexClientProvider>
           <body className={inter.className}>
             <Header />
-            {children}
+            <main className="flex flex-col px-12 pt-10">
+              {children}
+            </main>
           </body>
         </ConvexClientProvider>
-      </AuthProvider>
+      {/* </AuthProvider> */}
     </html>
   );
 }

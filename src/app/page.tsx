@@ -1,32 +1,25 @@
 "use client"
-import { Button } from "@/components/ui/button";
-import { useCreateFile, useGetFiles } from "@/hooks/repo/files";
-import { SignInButton, SignOutButton, SignedIn, SignedOut, useOrganization, useUser } from "@clerk/nextjs";
+import { useGetFiles } from "@/hooks/repo/files";
+import { FileListComponent } from "../components/files/file-list-component";
+import { FormUploadFileModal } from "../components/files/form-upload-file-modal";
+import { useUserOrgId } from "@/hooks/user";
+
 
 export default function Home() {
-  const createFile = useCreateFile()
-  const {organization} =  useOrganization()
-  const user = useUser()
-  const organizationId = organization?.id || user.user?.id as string
-  const files = useGetFiles({organizationId})
-
+  const organizationId = useUserOrgId();
+  const files = useGetFiles({organizationId});
+	console.log("TCL: Home -> files", files)
   
   return (
-    <main>
-      <div>
-       home
-       <Button onClick={() => {
-         
-         console.log("TCL: Home -> organizationId", organizationId)
-         if (!organizationId) return
-
-        createFile({
-          name: "haha",
-          organizationId,
-         })
-       }}>add file</Button>
-      </div>
-      <div>{files?.map(file => <div key={file._id}>{file.name}</div>)}</div>
-    </main>
+    <div className="flex flex-col gap-4">
+      {files && 
+        <div className="flex justify-end">
+          <FormUploadFileModal/>
+        </div>
+      }
+      <FileListComponent
+        files={files}
+      />
+    </div>
   );
 }

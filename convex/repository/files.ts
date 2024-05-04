@@ -3,7 +3,6 @@ import { mutation, query } from "../_generated/server";
 import { convexCurrentUser } from "./auth";
 import { Ctx, getUserDetails } from "./users";
 
-// mutations
 // TODO: type safe
 const hasPermission = async (ctx: Ctx, organizationId: string) => {
     // return true
@@ -12,19 +11,24 @@ const hasPermission = async (ctx: Ctx, organizationId: string) => {
 
     if (!authenticatedUser) return false;
 
-    const user = await getUserDetails(ctx, authenticatedUser.tokenIdentifier)
-
-    if (!user) return false
+    const userDetails = await getUserDetails(ctx, authenticatedUser.tokenIdentifier)
 
     // has permission
     return (
-        user.organizationIds.includes(organizationId) || 
-        user.tokenIdentifier.includes(organizationId)
+        userDetails?.organizationIds.includes(organizationId) || 
+        userDetails?.tokenIdentifier.includes(organizationId)
     )
+    return authenticatedUser
 }
+
+// mutations
+export const generateUploadUrl = mutation(async (ctx) => {
+  return await ctx.storage.generateUploadUrl();
+});
 
 export const createFile = mutation({
     args: {
+        fileId: v.id("_storage"),
         name: v.string(),
         organizationId: v.string(),
     },
@@ -34,12 +38,13 @@ export const createFile = mutation({
         const hasPerm = await hasPermission(ctx, organizationId)
 
         if (!hasPerm) {
-            throw new ConvexError("You can not use this service")
+            throw new ConvexError("no organization found")
         }
 
         ctx.db.insert("files", {
             name: args.name,
-            organizationId: organizationId
+            organizationId: organizationId,
+            fileId: args.fileId,
         })
     },
 })
@@ -52,13 +57,18 @@ export const getFiles = query({
     async handler(ctx, args) {
         const organizationId = args.organizationId
         
-        const hasPerm = await hasPermission(ctx, organizationId)
+        if (!organizationId) throw new ConvexError("no organization found")
 
+        // const hasPerm = await ctx.auth.getUserIdentity()
+		// console.log("TCL: handler -> hasPerm", hasPerm)
+        //  currentUser()
+        const hasPerm = hasPermission(ctx, organizationId)
+        
         if (!hasPerm) return []
 
         return ctx.db.query("files").withIndex(
             "by_organizationId",
-            q => q.eq("organizationId", args.organizationId)
+            q => q.eq("organizationId", organizationId)
         ).collect()
     },
 })

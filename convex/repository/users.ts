@@ -3,17 +3,17 @@ import { MutationCtx, QueryCtx, internalMutation } from "../_generated/server";
 
 export type Ctx = QueryCtx | MutationCtx;
 
-export async function getUserDetails(ctx: Ctx, tokenIdentifier: string) {
-    const user = await ctx.db.query("users")
+// queries
+export function getUserDetails(ctx: Ctx, tokenIdentifier: string) {
+    return ctx.db.query("users")
         .withIndex(
             "by_tokenIdentifier", 
             q => q.eq("tokenIdentifier", tokenIdentifier)
         )
         .first();
-  
-    return user;
 }
 
+// mutations
 export const createUser = internalMutation({
     args: { 
         tokenIdentifier: v.string(),
