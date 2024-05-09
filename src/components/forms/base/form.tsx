@@ -19,7 +19,7 @@ interface ReactFormProps<T extends FieldValues> extends ReactFormHTMLAttributes<
   formOptions?: Omit<UseFormProps, "resolver" | "defaultValues">,
   defaultValues: T, // DefaultValues<T>
   children: ReactElement<T>[],
-  onSubmit: (values: T, form: UseFormReturn) => Promise<any>,
+  onSubmit: (values: T, form: UseFormReturn) => void,
   onSubmitError?: SubmitErrorHandler<T>,
 }
 

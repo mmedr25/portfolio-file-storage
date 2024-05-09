@@ -1,4 +1,6 @@
 import { useOrganization, useUser } from "@clerk/nextjs"
+import { useQuery } from "convex/react"
+import { api } from "../../convex/_generated/api"
 
 export const useUserOrgId = () => {
     const user = useUser()
@@ -9,4 +11,11 @@ export const useUserOrgId = () => {
 
     if(!user.isSignedIn || !organization.isLoaded) return undefined
     return organization.organization?.id || user.user?.id as string
+}
+
+export const useGetUserDetails = ({tokenIdentifier}: {tokenIdentifier?: string}) => {
+    return useQuery(
+        api.repository.users.getUserDetails,
+        tokenIdentifier ? { tokenIdentifier } : "skip",
+    )
 }

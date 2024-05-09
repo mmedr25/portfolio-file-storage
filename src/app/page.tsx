@@ -1,25 +1,22 @@
 "use client"
-import { useGetFiles } from "@/hooks/repo/files";
-import { FileListComponent } from "../components/files/file-list-component";
-import { FormUploadFileModal } from "../components/files/form-upload-file-modal";
-import { useUserOrgId } from "@/hooks/user";
+import { useGetFiles, usefiles } from "@/hooks/repo/files";
+import { FileListBrowser } from "../components/files/file-list-browser";
+// import { usefiles } from "@/providers/files-provider";
+import { FileListHeader } from "@/components/files/file-list-header";
 
+interface HomeProps {
+  searchParams: {
+    search: string | null
+  }
+}
 
-export default function Home() {
-  const organizationId = useUserOrgId();
-  const files = useGetFiles({organizationId});
-	console.log("TCL: Home -> files", files)
-  
+export default function Home({searchParams}: HomeProps) {
+  const filesData = usefiles({searchQuery: searchParams?.search, getter: useGetFiles})
+
   return (
     <div className="flex flex-col gap-4">
-      {files && 
-        <div className="flex justify-end">
-          <FormUploadFileModal/>
-        </div>
-      }
-      <FileListComponent
-        files={files}
-      />
+      <FileListHeader title={"All files"} />
+      <FileListBrowser files={filesData?.files}/>
     </div>
   );
 }

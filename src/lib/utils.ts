@@ -13,3 +13,16 @@ export const formatDateToReadable = (date: number) => {
     date: fileDate.toLocaleDateString()
   }
 }
+
+export function debounce(callback: Function, timeout: number){
+  let timer: NodeJS.Timeout;
+
+  return (...args: any[]) => {
+    clearTimeout(timer);
+
+    timer = setTimeout(
+      () => callback.apply(this, args), 
+      timeout
+    )
+  }
+}
