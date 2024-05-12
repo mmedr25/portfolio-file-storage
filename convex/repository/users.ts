@@ -1,19 +1,11 @@
 import { ConvexError, v } from "convex/values";
 import { MutationCtx, QueryCtx, internalMutation, query } from "../_generated/server";
 import { Roles } from "../models/users";
+import { convexCurrentUser } from "./auth";
 
 export type Ctx = QueryCtx | MutationCtx;
 
 // queries
-// export function getUserDetails(ctx: Ctx, tokenIdentifier: string) {
-//     return ctx.db.query("users")
-//         .withIndex(
-//             "by_tokenIdentifier", 
-//             q => q.eq("tokenIdentifier", tokenIdentifier)
-//         )
-//         .first();
-// }
-
 export const getUserDetails = query({
     args: {
         tokenIdentifier: v.string()
@@ -27,22 +19,67 @@ export const getUserDetails = query({
             .first();
     },
 })
+
+export const getMe = query({
+    args: {},
+    async handler(ctx) {
+        const authUser = await convexCurrentUser(ctx);
+  
+        if (!authUser) return null; 
+
+        const userDetails = await getUserDetails(ctx, {tokenIdentifier: authUser.tokenIdentifier});
+
+        if (!userDetails)  return null;
+  
+        return {
+            _id: userDetails._id,
+            _creationTime: userDetails._creationTime,
+            name: userDetails?.name,
+            image: userDetails?.image
+        }
+    },
+});
+
 // mutations
 export const createUser = internalMutation({
     args: { 
         tokenIdentifier: v.string(),
-        // name: v.string(), 
-        // image: v.string() 
+        name: v.optional(v.string()), 
+        image: v.optional(v.string()) 
     },
     async handler(ctx, args) {
         ctx.db.insert("users", {
             tokenIdentifier: args.tokenIdentifier,
             organizationIds: [],
-            // name: args.name,
-            // image: args.image,
+            name: args.name,
+            image: args.image,
         });
     }
 });
+
+export const updateUser = internalMutation({
+    args: { 
+        tokenIdentifier: v.string(), 
+        name: v.string(), 
+        image: v.string() 
+    },
+    async handler(ctx, args) {
+      const user = await ctx.db.query("users")
+        .withIndex(
+            "by_tokenIdentifier", 
+            (q) => q.eq("tokenIdentifier", args.tokenIdentifier)
+        ).first();
+  
+      if (!user) {
+        throw new ConvexError("no user with this token found");
+      }
+  
+      await ctx.db.patch(user._id, {
+        name: args.name,
+        image: args.image,
+      });
+    },
+  });
 
 export const addOrganizationToUser = internalMutation({
     args: { 

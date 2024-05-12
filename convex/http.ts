@@ -11,6 +11,7 @@ http.route({
     handler: httpAction(async (ctx, request) => {
         const payloadString = await request.text();
         const headerPayload = request.headers;
+        const CLERK_HOSTNAME = process.env.CLERK_HOSTNAME;
 
         try {
             const result = await ctx.runAction(internal.clerk.fulfill, {
@@ -25,45 +26,37 @@ http.route({
             switch (result.type) {
                 case "user.created":
                     await ctx.runMutation(internal.repository.users.createUser, {
-                        tokenIdentifier: `https://allowing-chipmunk-76.clerk.accounts.dev|${result.data.id}`,
-                        // name: `${result.data.first_name ?? ""} ${
-                        // result.data.last_name ?? ""
-                        // }`,
-                        // image: result.data.image_url,
+                        tokenIdentifier: `${CLERK_HOSTNAME}|${result.data.id}`,
+                        name: `${result.data.first_name} ${ result.data.last_name}`,
+                        image: result.data.image_url,
                     });
                 break;
-                // case "user.updated":
-                // await ctx.runMutation(internal.users.updateUser, {
-                //     tokenIdentifier: `https://allowing-chipmunk-76.clerk.accounts.dev|${result.data.id}`,
-                //     name: `${result.data.first_name ?? ""} ${
-                //     result.data.last_name ?? ""
-                //     }`,
-                //     image: result.data.image_url,
-                // });
-                // break;
+                case "user.updated":
+                    await ctx.runMutation(internal.repository.users.updateUser, {
+                        tokenIdentifier: `${CLERK_HOSTNAME}|${result.data.id}`,
+                        name: `${result.data.first_name} ${result.data.last_name}`,
+                        image: result.data.image_url,
+                    });
+                break;
                 case "organizationMembership.created":
                     await ctx.runMutation(internal.repository.users.addOrganizationToUser, {
-                        tokenIdentifier: `https://allowing-chipmunk-76.clerk.accounts.dev|${result.data.public_user_data.user_id}`,
+                        tokenIdentifier: `${CLERK_HOSTNAME}|${result.data.public_user_data.user_id}`,
                         organizationId: result.data.organization.id,
                         role: result.data.role === "org:admin" ? "admin" : "member",
                     });
                 break;
                 case "organizationMembership.updated":
                     await ctx.runMutation(internal.repository.users.updateRoleInOrgForUser, {
-                        tokenIdentifier: `https://allowing-chipmunk-76.clerk.accounts.dev|${result.data.public_user_data.user_id}`,
+                        tokenIdentifier: `${CLERK_HOSTNAME}|${result.data.public_user_data.user_id}`,
                         organizationId: result.data.organization.id,
                         role: result.data.role === "org:admin" ? "admin" : "member",
                     });
                 break;
             }
 
-            return new Response(null, {
-                status: 200,
-            });
+            return new Response(null, {status: 200});
         } catch (err) {
-            return new Response("Webhook Error", {
-                status: 400,
-            });
+            return new Response("Webhook Error", {status: 400});
         }
     }),
 });

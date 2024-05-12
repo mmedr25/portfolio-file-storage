@@ -1,9 +1,8 @@
 import { ConvexError, v } from "convex/values";
-import { action, internalMutation, mutation, query } from "../_generated/server";
+import { MutationCtx, internalMutation, mutation, query } from "../_generated/server";
 import { canDeleteFile, hasAccessToFile, hasPermission } from "./auth";
 import { Doc } from "../_generated/dataModel";
 import { getAllFavorites } from "./favorites";
-import { permission } from "process";
 
 
 // mutations
@@ -17,32 +16,32 @@ export const createFile = mutation({
         name: v.string(),
         fileExt: v.string(),
         organizationId: v.string(),
-        fileLocation: v.string(),
-        // userId: v.id("users"),
-        // fileEndpoint: v.string(),
     },
     async handler(ctx, args) {
         const organizationId = args.organizationId
         
-        const hasPerm = await hasPermission(ctx, organizationId)
+        const userWithPermission = await hasPermission(ctx, organizationId)
 
-        if (!hasPerm) {
+        if (!userWithPermission) {
             throw new ConvexError("no organization found")
         }
 
-        ctx.db.insert("files", {
+        const fileLocation = await getFileUrl(ctx, {fileId: args.fileId})
+
+        if (!fileLocation)  throw new ConvexError("File was not save");
+
+        return await ctx.db.insert("files", {
             name: args.name,
             organizationId: organizationId,
             fileId: args.fileId,
             fileExt: args.fileExt,
-            fileLocation: args.fileLocation,
-            // userId: args.userId,
-            // fileEndpoint: args.fileEndpoint,
+            fileLocation: fileLocation,
+            userId: userWithPermission.user._id,
         })
     },
 })
 
-export const softDeletefileToogle = mutation({
+export const softDeletefileToggle = mutation({
     args: { 
         fileId: v.id("files"),
         shouldDelete: v.boolean()
@@ -57,9 +56,13 @@ export const softDeletefileToogle = mutation({
         ctx.db.patch(args.fileId, {
             shouldDelete: args.shouldDelete
         })
-        // ctx.db.delete(args.fileId);
     },
 });
+
+const deleteFile = async (ctx: MutationCtx, file: Doc<"files">) => {
+    await ctx.storage.delete(file.fileId);
+    return ctx.db.delete(file._id);
+}
 
 export const deleteAllFiles = internalMutation({
     args: {},
@@ -69,23 +72,22 @@ export const deleteAllFiles = internalMutation({
         .withIndex("by_shouldDelete", (q) => q.eq("shouldDelete", true))
         .collect();
   
-      await Promise.all(
-        files.map(async (file) => {
-          await ctx.storage.delete(file.fileId);
-          return await ctx.db.delete(file._id);
-        })
-      );
+        await Promise.all(
+            files.map(async (file) => {
+                return deleteFile(ctx, file)
+            })
+        );
     },
-  });
+})
 
-export const getFileUrl = action({
+export const getFileUrl = query({
     args: {
         fileId: v.id("_storage")
     },
     async handler(ctx, args) {
         return ctx.storage.getUrl(args.fileId)
     }
-});
+})
 
 const searchFilesByName = (allFiles: Doc<"files">[], searchQuery?: string | null) => {
     if (!allFiles?.length) return {
@@ -101,13 +103,12 @@ const searchFilesByName = (allFiles: Doc<"files">[], searchQuery?: string | null
     }
 
     const filteredFiles = allFiles.filter(file => file.name.toLowerCase().includes(searchQuery.toLowerCase()))
-    
+
     return {
         files: filteredFiles,
         hasfiles: !!filteredFiles?.length,
         isSearchable: true
     }
-    
 }
 
 const SearchQueryType = v.optional(v.union(v.string(), v.null()))
@@ -126,17 +127,16 @@ export const getFiles = query({
         
         if (!hasPerm) throw new ConvexError("no organization found")
         
-        const allFiles = await ctx.db.query("files").withIndex(
+        const filesThatAreNotInTrash = await ctx.db.query("files").withIndex(
             "by_organizationId",
             q => q.eq("organizationId", organizationId)
-        ).filter(q => q.or(q.eq(q.field("shouldDelete"), undefined) , q.eq(q.field("shouldDelete"), false)))
-        // q.field("shouldDelete"), false
-        //.filter(q => q.or(q.) q.not(q.field("shouldDelete")))
-        // ).filter(q => q.eq(q.field("shouldDelete"), true))
-        .collect()
+        ).filter(q => 
+            q.or(q.eq(q.field("shouldDelete"), undefined), 
+            q.eq(q.field("shouldDelete"), false))
+        ).collect()
 
-        return searchFilesByName(allFiles, args?.searchQuery)
-    },
+        return searchFilesByName(filesThatAreNotInTrash, args?.searchQuery)
+    }
 })
 
 export const getAllFavoriteFiles = query({
@@ -152,7 +152,7 @@ export const getAllFavoriteFiles = query({
         const files = (await Promise.all(filesPromises)).filter(file => !file?.shouldDelete && file?._id) as Doc<"files">[]
 
         return searchFilesByName(files, args?.searchQuery)
-    },
+    }
 })
 
 export const getAllTrashFiles = query({
@@ -170,7 +170,7 @@ export const getAllTrashFiles = query({
             .collect()
 
         return searchFilesByName(files, args?.searchQuery)
-    },
+    }
 })
 
 
@@ -180,5 +180,5 @@ export const getFile = query({
     },
     async handler(ctx, args) {
         return ctx.db.get(args.fileId)
-    },
+    }
 })

@@ -1,5 +1,5 @@
 import { Skeleton } from "@/components/ui/skeleton"
-import FileListContainer from "./file-list-container"
+import FileListGridContainer from "./file-list-grid-container"
 import { Card } from "../ui/card"
 
 
@@ -24,14 +24,14 @@ const FileCardSkeleton = () => {
 export const LoadingFiles = () => {
     return (
         <div className="flex flex-col gap-4">
-            <FileListContainer>
+            <FileListGridContainer>
                 <FileCardSkeleton />
                 <FileCardSkeleton />
                 <FileCardSkeleton />
                 <FileCardSkeleton />
                 <FileCardSkeleton />
                 <FileCardSkeleton />
-            </FileListContainer>
+            </FileListGridContainer>
         </div>
     )
 }

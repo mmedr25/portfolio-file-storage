@@ -23,9 +23,9 @@ export const hasPermission = async (ctx: Ctx, organizationId: string) => {
         userDetails.tokenIdentifier.includes(organizationId)
     )
     
-    if (!userDetails) return null
+    if (!hasAccess) return null
 
-    return { user: userDetails }
+    return {user: userDetails}
 }
 
 
@@ -43,11 +43,11 @@ export const hasAccessToFile = async (ctx: Ctx, fileId: Id<"files">) => {
 
 export function canDeleteFile(user: Doc<"users">, file: Doc<"files">) {
     const canDelete = (
-        // file.userId === user._id ||
+        file.userId === user._id ||
         user.organizationIds.find((org) => org.organizationId === file.organizationId)?.role === "admin"
     )
   
     if (!canDelete) {
-      throw new ConvexError("you have no acces to delete this file");
+      throw new ConvexError("you have no permission to delete this file");
     }
   }

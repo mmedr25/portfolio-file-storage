@@ -17,7 +17,7 @@ export const formatDateToReadable = (date: number) => {
 export function debounce(callback: Function, timeout: number){
   let timer: NodeJS.Timeout;
 
-  return (...args: any[]) => {
+  return function (this: Function,...args: any[]) {
     clearTimeout(timer);
 
     timer = setTimeout(

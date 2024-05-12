@@ -1,13 +1,14 @@
 import { ConvexError, v } from "convex/values";
 import { mutation, query } from "../_generated/server";
-import { hasAccessToFile, hasPermission } from "./auth";
+import { hasPermission } from "./auth";
 
 export const toggleFavorite = mutation({
     args: { 
-        fileId: v.id("files")
+        fileId: v.id("files"),
+        organizationId: v.string()
     },
     async handler(ctx, args) {
-        const userDetails = await hasAccessToFile(ctx, args.fileId);
+        const userDetails = await hasPermission(ctx, args.organizationId);
 
         if (!userDetails) {
             throw new ConvexError("no access to file");
@@ -18,16 +19,16 @@ export const toggleFavorite = mutation({
             .withIndex("by_userId_orgId_fileId", (q) =>
             q
                 .eq("userId", userDetails.user._id)
-                .eq("organizationId", userDetails.file.organizationId)
-                .eq("fileId", userDetails.file._id)
+                .eq("organizationId", args.organizationId)
+                .eq("fileId", args.fileId)
             )
             .first();
 
         if (!favorite) {
             return await ctx.db.insert("favorites", {
-                fileId: userDetails.file._id,
+                fileId: args.fileId,
                 userId: userDetails.user._id,
-                organizationId: userDetails.file.organizationId,
+                organizationId: args.organizationId,
             })
             
         }
@@ -35,6 +36,7 @@ export const toggleFavorite = mutation({
         ctx.db.delete(favorite._id);
     }
 });
+
   
 export const getAllFavorites = query({
     args: { 
@@ -42,8 +44,6 @@ export const getAllFavorites = query({
     },
     async handler(ctx, args) {
       const userDetails = await hasPermission(ctx, args.organizationId);
-    //   const userDetails = await hasAccessToFile(ctx, args.fileId);
-
   
       if (!userDetails || !userDetails.user) return []; 
   
@@ -63,20 +63,16 @@ export const getFavorite = query({
         organizationId: v.string()
     },
     async handler(ctx, args) {
-        // const userDetails = await hasPermission(ctx, args.organizationId);
-        
-        const userDetails = await hasAccessToFile(ctx, args.fileId);
+        const userDetails = await hasPermission(ctx, args.organizationId);
 
         if (!userDetails || !userDetails.user) return null;
   
-      return await ctx.db.query("favorites")
-        .withIndex(
-            "by_userId_orgId_fileId", 
-            (q) => q.eq("userId", userDetails.user?._id)
-                    .eq("organizationId", args.organizationId)
-                    .eq("fileId", args.fileId)
-        ).first();
+        return await ctx.db.query("favorites")
+            .withIndex(
+                "by_userId_orgId_fileId", 
+                (q) => q.eq("userId", userDetails.user?._id)
+                        .eq("organizationId", args.organizationId)
+                        .eq("fileId", args.fileId)
+            ).first();
     },
 });
-
-

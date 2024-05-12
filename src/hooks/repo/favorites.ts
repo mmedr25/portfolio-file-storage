@@ -16,4 +16,4 @@ export const useGetFavorite = ({organizationId, fileId}: {organizationId?: strin
 )
 
 // mutations
-export const useToogleFavorites = () => useMutation(FAVORITES_REPOSITORY.toggleFavorite)
+export const useToggleFavorites = () => useMutation(FAVORITES_REPOSITORY.toggleFavorite)

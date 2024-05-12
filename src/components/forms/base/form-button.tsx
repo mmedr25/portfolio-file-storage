@@ -1,4 +1,3 @@
-"use client";
 import ButtonWithIcon from "../../buttons/button-with-icon";
 import { CloudUploadIcon } from "lucide-react";
 import FormSubmitButtonWrapper from "./form-submit-button-wrapper";

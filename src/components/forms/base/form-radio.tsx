@@ -1,8 +1,7 @@
 "use client"
 import { FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
 import { Switch } from "@/components/ui/switch"
-import { InputHTMLAttributes, ReactNode } from "react"
+import { InputHTMLAttributes } from "react"
 import { FieldValues, Path, useFormContext } from "react-hook-form"
 
 type InputHTMLAttributesWithoutForm<T> =  Omit<InputHTMLAttributes<T>, "form" | "name">

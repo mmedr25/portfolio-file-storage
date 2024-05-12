@@ -1,6 +1,5 @@
-import { useAction, useMutation, useQuery } from "convex/react";
+import { useMutation, useQuery } from "convex/react";
 import { api } from "../../../convex/_generated/api";
-import { Id } from "../../../convex/_generated/dataModel";
 import { useUserOrgId } from "../user";
 
 const FILES_REPOSITORY = api.repository.files
@@ -23,14 +22,7 @@ export const useGetTrashFiles = ({organizationId, searchQuery}: {organizationId?
 )
 
 
-
-export const useGetFileLocation = () => useAction(FILES_REPOSITORY.getFileUrl)
-// export const useGetFileUrl = ({fileId}: {fileId?: Id<"_storage">}) => useQuery(
-//     FILES_REPOSITORY.getFileUrl,
-//     fileId ? { fileId } : "skip",
-// )
-
-export const usefiles = ({searchQuery, getter}: {searchQuery: string | null, getter: GetFileType}) => {
+export const useFiles = ({searchQuery, getter}: {searchQuery: string | null, getter: GetFileType}) => {
     const organizationId = useUserOrgId();
     return getter({ organizationId, searchQuery })
 }
@@ -38,7 +30,7 @@ export const usefiles = ({searchQuery, getter}: {searchQuery: string | null, get
 // mutation hooks
 export const useCreateFile = () => useMutation(FILES_REPOSITORY.createFile)
 
-export const useSoftDeleteFileToogle = () => useMutation(FILES_REPOSITORY.softDeletefileToogle)
+export const useSoftDeleteFileToggle = () => useMutation(FILES_REPOSITORY.softDeletefileToggle)
 
 export const useUploadUrl = () => useMutation(FILES_REPOSITORY.generateUploadUrl)
 

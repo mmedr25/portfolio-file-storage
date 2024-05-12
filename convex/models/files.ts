@@ -7,7 +7,7 @@ export const files = defineTable({
     fileExt: v.string(),
     name: v.string(),
     organizationId: v.string(),
-    // userId: v.id("users"),
+    userId: v.id("users"),
     fileLocation: v.string(),
     shouldDelete: v.optional(v.boolean()),
 })

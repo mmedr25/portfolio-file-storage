@@ -3,16 +3,19 @@ import { OrganizationSwitcher, SignedIn, SignedOut, UserButton, useUser } from "
 import { FunctionComponent } from "react";
 import SignInButton from "../buttons/button-sign-in";
 import { Skeleton } from "../ui/skeleton";
+import Link from "next/link";
 
 interface HeaderProps {
-    
+
 }
 
 const Header: FunctionComponent<HeaderProps> = () => {
     const {isLoaded} = useUser()
     return (
         <div className="flex items-center py-4 px-12 border-b">
-            <div>mmedr25</div>
+            <div>
+                <Link href={"/"}>mmedr25</Link>
+            </div>
             <div className="flex flex-1 justify-end items-center gap-4">
                 {isLoaded ? 
                     <>

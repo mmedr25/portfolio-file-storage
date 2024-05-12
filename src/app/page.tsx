@@ -1,8 +1,6 @@
 "use client"
-import { useGetFiles, usefiles } from "@/hooks/repo/files";
-import { FileListBrowser } from "../components/files/file-list-browser";
-// import { usefiles } from "@/providers/files-provider";
-import { FileListHeader } from "@/components/files/file-list-header";
+import { useGetFiles, useFiles } from "@/hooks/repo/files";
+import PageContent from "@/components/page-content";
 
 interface HomeProps {
   searchParams: {
@@ -11,12 +9,7 @@ interface HomeProps {
 }
 
 export default function Home({searchParams}: HomeProps) {
-  const filesData = usefiles({searchQuery: searchParams?.search, getter: useGetFiles})
+  const filesData = useFiles({searchQuery: searchParams?.search, getter: useGetFiles})
 
-  return (
-    <div className="flex flex-col gap-4">
-      <FileListHeader title={"All files"} />
-      <FileListBrowser files={filesData?.files}/>
-    </div>
-  );
+  return <PageContent  {...{...filesData, title: "All files"}}/>
 }

@@ -22,7 +22,7 @@ export const FilePreview = ({fileExt, fileUrl, name}: FilePreviewProps) => {
         <div className="flex justify-center items-center h-full">
             <FileIconComponent 
                 fileExt={fileExt} 
-                className={"w-32 h-32 text-muted"}
+                className={" w-[100%] h-[60%] text-muted"}
             />
         </div>
     )
