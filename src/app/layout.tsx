@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <ConvexClientProvider>
-        <body className={"flex flex-col min-h-[100dvh] min-w-[450px] " + inter.className}>
+        <body className={"flex flex-col min-h-[100vh] " + inter.className}>
           <Header />
           <main className="flex flex-1 px-12 flex-col-reverse md:flex-row-reverse">
             <div className="flex-1 pt-10 relative z-1">
