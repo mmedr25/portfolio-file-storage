@@ -12,7 +12,7 @@ interface HeaderProps {
 const Header: FunctionComponent<HeaderProps> = () => {
     const {isLoaded} = useUser()
     return (
-        <div className="flex items-center py-4 px-12 border-b">
+        <div className="flex items-center py-4 px-6 md:px-12 border-b">
             <div className="hidden md:block">
                 <Link href={"/"}>mmedr25</Link>
             </div>
@@ -20,8 +20,10 @@ const Header: FunctionComponent<HeaderProps> = () => {
                 {isLoaded ? 
                     <>
                         <SignedIn>
-                            <OrganizationSwitcher/>
-                            <UserButton/>
+                            <div className="flex-1 md:flex-none flex items-center justify-between">
+                                <OrganizationSwitcher/>
+                                <UserButton/>
+                            </div>
                         </SignedIn>
                         <SignedOut>
                             <SignInButton />

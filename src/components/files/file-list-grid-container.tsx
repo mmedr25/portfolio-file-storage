@@ -5,7 +5,7 @@ interface FileListGridContainerProps {
 }
 
 const FileListGridContainer: FunctionComponent<FileListGridContainerProps> = ({children}) => (
-    <div className="grid grid-cols-files gap-8 justify-center">
+    <div className="flex flex-col gap-4 md:grid md:grid-cols-files md:gap-8 md:justify-center">
         {children}
     </div>
 )

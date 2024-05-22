@@ -29,7 +29,7 @@ export default function RootLayout({
       <ConvexClientProvider>
         <body className={"flex flex-col min-h-[100vh] " + inter.className}>
           <Header />
-          <main className="flex flex-1 px-12 flex-col-reverse md:flex-row-reverse">
+          <main className="flex flex-1 px-6 md:px-12 flex-col-reverse md:flex-row-reverse">
             <div className="flex-1 pt-10 relative z-1">
               {children}
             </div>

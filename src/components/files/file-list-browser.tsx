@@ -97,7 +97,7 @@ export const FileListBrowser = ({files, state}: {files?: Array<Doc<"files">>, st
           </FileListGridContainer>
         </TabsContent>
         <TabsContent value="table">
-        <DataTable columns={fileColumns} data={files} />
+          <DataTable columns={fileColumns} data={files} />
         </TabsContent>
       </Tabs>
 
