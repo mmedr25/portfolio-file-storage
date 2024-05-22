@@ -1,3 +1,13 @@
+## Project url
+    - https://portfolio-file-storage.pages.dev
+
+## Description
+    This is a file storage app. you will need to create an account to use it
+
+## Warning
+    Please do not store sensitive informations on the app. It is meant only as a showcase
+
+
 This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
 
 ## Getting Started

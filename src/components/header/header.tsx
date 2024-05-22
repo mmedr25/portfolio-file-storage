@@ -13,7 +13,7 @@ const Header: FunctionComponent<HeaderProps> = () => {
     const {isLoaded} = useUser()
     return (
         <div className="flex items-center py-4 px-12 border-b">
-            <div>
+            <div className="hidden md:block">
                 <Link href={"/"}>mmedr25</Link>
             </div>
             <div className="flex flex-1 justify-end items-center gap-4">
